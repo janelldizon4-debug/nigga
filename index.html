@@ -28,29 +28,6 @@ body {
     width: 90%;
     max-width: 350px;
 }
-#adminPanel {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 20px;
-    border-radius: 10px;
-    background: rgba(0,0,0,0.95);
-    border: 2px solid #00aaff;
-    z-index: 99999; 
-    text-align: center;
-    pointer-events: auto; 
-}
-
-#accessWrapper.active, 
-#mainContent.active {
-    pointer-events: none;
-}
-
-.container, .inner-box {
-    pointer-events: auto;
-}
 
 .logo {
     width: 600px;
@@ -344,6 +321,7 @@ button.glass-button:hover {
     <input type="text" id="accessInput" placeholder="Access Key">
     <button class="glass-button" onclick="checkAccessKeyCustom()">Submit</button>
     <div class="status" id="accessStatus"></div>
+
     
     <p class="notes" style="color:#fff; margin-top: 15px; font-size: 13px;">
         Notes: Before using this tool, log out first from your account.
@@ -358,6 +336,7 @@ button.glass-button:hover {
 <div id="mainContent" style="display:none;">
   <div class="center-wrapper">
     <div class="container" style="max-width:300px; padding:15px;">
+      <!-- Smaller inner box -->
       <div class="inner-box" style="
           background: rgba(0,0,0,0.6);
           backdrop-filter: blur(12px);
@@ -367,43 +346,41 @@ button.glass-button:hover {
           text-align:center;
       ">
           
-        <div class="user-info">
-          <div class="info-line">🌐 Welcome</div>
-          <div class="info-line">🌐 <span id="welcomeUser"></span></div>
-          <div class="info-line">🌐 <span id="subscriptionInfo"></span></div>
-        </div>
+          <div class="user-info">
+  <div class="info-line">🌐 Welcome</div>
+  <div class="info-line">🌐 <span id="welcomeUser"></span></div>
+  <div class="info-line">🌐 <span id="subscriptionInfo"></span></div>
+</div>
           
-        <!-- Game Select -->
-        <div id="gameSelectWrapper">
-          <select id="gameSelect">
-              <option value="">-- Select Game --</option>
-              <option value="1">Car Parking Multiplayer</option>
-              <option value="2">Car Parking Multiplayer 2</option>
-          </select>
-        </div>
+      <!-- Game Select -->
+   <div id="gameSelectWrapper">
+    <select id="gameSelect">
+        <option value="">-- Select Game --</option>
+        <option value="1">Car Parking Multiplayer</option>
+        <option value="2">Car Parking Multiplayer 2</option>
+    </select>
+</div>
 
-        <!-- Login Form -->
-        <div id="loginForm">
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="password" placeholder="Password">
-            <button class="login" onclick="loginFirebase()">Login</button>
-            <div id="status" class="status"></div>
-        </div>
+      <!-- Login Form -->
+      <div id="loginForm">
+          <input type="email" id="email" placeholder="Email">
+          <input type="password" id="password" placeholder="Password">
+          <button class="login" onclick="loginFirebase()">Login</button>
+          <div id="status" class="status"></div>
+      </div>
 
-        <!-- Service Buttons -->
-        <div id="menuButtons">
-            <button class="menu" onclick="kingRank()">👑 King Rank</button>
-            <button class="menu" onclick="changeEmail()">📧 Change Email</button>
-            <button class="menu" onclick="changePassword()">🔐 Change Password</button>
-            <div id="serviceStatus" class="status"></div>
-        </div>
-        
+      <!-- Service Buttons -->
+      <div id="menuButtons">
+          <button class="menu" onclick="kingRank()">👑 King Rank</button>
+          <button class="menu" onclick="changeEmail()">📧 Change Email</button>
+          <button class="menu" onclick="changePassword()">🔐 Change Password</button>
+          <div id="serviceStatus" class="status"></div>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Admin Panel: fixed & clickable -->
+ 
+ <!-- Admin Panel -->
 <div id="adminPanel" style="
     display:none;
     position: fixed;
@@ -424,59 +401,40 @@ button.glass-button:hover {
     <div id="adminStatus" class="status"></div>
 </div>
 
-<footer>© 2026 Cris Gaming. All Rights Reserved.</footer>
-
-</body>
-
    <footer>© 2026 Cris Gaming. All Rights Reserved.</footer>
     
 <script src="key.js"></script>
 <script>
-function viewAllUsers() {
-    const adminStatus = document.getElementById("adminStatus");
 
-    if (!REGISTERED_KEYS || REGISTERED_KEYS.length === 0) {
-        adminStatus.innerHTML = "No users found.";
+function viewAllUsers() {
+    const adminStatus = document.getElementById('adminStatus');
+    if (!REGISTERED_KEYS.length) {
+        adminStatus.textContent = "No users found.";
         return;
     }
 
-    // Bilang kung ilang user bawat key
-    const keyCount = {};
-    REGISTERED_KEYS.forEach(u => {
-        keyCount[u.accessKey] = (keyCount[u.accessKey] || 0) + 1;
-    });
-
-    let html = `
-        <table style="width:100%; color:white; border-collapse:collapse; font-size:12px;">
-            <tr>
-                <th style="border:1px solid #00aaff; padding:5px;">Username</th>
-                <th style="border:1px solid #00aaff; padding:5px;">Access Key</th>
-                <th style="border:1px solid #00aaff; padding:5px;">Users per Key</th>
-            </tr>
-    `;
+    let html = '<table style="width:100%; color:#fff; border-collapse: collapse;">';
+    html += '<tr><th style="border-bottom:1px solid #00aaff; text-align:left;">User</th><th style="border-bottom:1px solid #00aaff; text-align:left;">Access Key</th><th style="border-bottom:1px solid #00aaff; text-align:left;">Status</th></tr>';
 
     REGISTERED_KEYS.forEach(u => {
-        html += `
-            <tr>
-                <td style="border:1px solid #00aaff; padding:5px;">${u.name}</td>
-                <td style="border:1px solid #00aaff; padding:5px;">${u.accessKey}</td>
-                <td style="border:1px solid #00aaff; padding:5px; text-align:center;">
-                    ${keyCount[u.accessKey]}
-                </td>
-            </tr>
-        `;
+        html += `<tr>
+                    <td style="padding:4px 0;">${u.name}</td>
+                    <td style="padding:4px 0;">${u.accessKey}</td>
+                    <td style="padding:4px 0;">${u.revoked ? 'Revoked ❌' : 'Active ✅'}</td>
+                 </tr>`;
     });
 
-    html += `</table>`;
+    html += '</table>';
     adminStatus.innerHTML = html;
 }
+
+const OWNER_KEY = "Cris-Key10829"; 
 
 function checkAccessKeyCustom() {
     const inputKey = document.getElementById("accessInput").value.trim();
     const status = document.getElementById("accessStatus");
     const now = new Date();
 
-    // Hanapin ang user base sa key
     const user = REGISTERED_KEYS.find(u => u.accessKey === inputKey);
 
     if (!user) {
@@ -485,64 +443,47 @@ function checkAccessKeyCustom() {
     }
 
     if (user.revoked) {
-        status.textContent = "🚫 Key revoked. Contact owner.";
+        status.textContent = "🚫 Key revoked. Ask owner for new key.";
         return;
     }
 
-    if (user.stop) {
-        const stopUntil = user.stopExpires ? new Date(user.stopExpires) : null;
-        if (!stopUntil || now < stopUntil) {
-            status.textContent = "⏸ Key temporarily stopped. Contact owner.";
-            return;
-        } else {
-            // Stop expired, i-reset
-            user.stop = false;
-            user.stopExpires = null;
-        }
-    }
-
-    const expiryDate = user.expires ? new Date(user.expires) : null;
-    if (expiryDate && now > expiryDate) {
+    const expiryDate = new Date(user.expires);
+    if (now > expiryDate) {
         status.textContent = "⏰ Key expired. Please renew.";
         return;
     }
 
-    // ✅ Key valid
     window.currentUserName = user.name;
     window.currentUserKey = user.accessKey;
 
-    // Ipakita ang main content at itago ang access wrapper
+    // Show main content
     document.getElementById("accessWrapper").style.display = "none";
     document.getElementById("mainContent").style.display = "block";
 
-    // I-update ang welcome at subscription info
-    document.getElementById("welcomeUser").textContent = "Welcome, " + user.name;
-    document.getElementById("subscriptionInfo").textContent = "Subscription: " + (user.subscription || "Free");
+    // Welcome info
+    const welcomeDiv = document.getElementById("welcomeUser");
+    if (welcomeDiv) welcomeDiv.textContent = "Welcome, " + user.name;
 
-    // ===== OWNER CHECK =====
+    const subDiv = document.getElementById("subscriptionInfo");
+    if (subDiv) subDiv.textContent = "Subscription: " + user.subscription;
+
+    console.log("Access granted:", user.name);
+
+    // 🔹 Owner/Admin check
     if (user.accessKey === OWNER_KEY) {
-        // Optional: disable pointer-events sa ibang divs para makapag-interact sa admin panel
-        document.getElementById("accessWrapper").classList.add("active");
-        document.getElementById("mainContent").classList.add("active");
-
-        // Ipakita ang admin panel
         const admin = document.getElementById("adminPanel");
-        admin.style.display = "block";
-
+        admin.style.display = "block";         // Show admin panel
+        admin.style.pointerEvents = "auto";
         status.textContent = "⚡ Owner Access Granted!";
     } else {
         status.textContent = "✅ Access Granted!";
     }
-
-    console.log("Access granted:", user.name);
 }
 
-// Enter key listener para sa access input
+// Press Enter to submit
 document.getElementById('accessInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') checkAccessKeyCustom();
+    if(e.key === 'Enter') checkAccessKeyCustom();
 });
-
-
 
 const _T = [56,52,54,50,54,49,56,56,51,56,58,65,65,69,83,83,106,109,97,109,120,77,90,117,111,87,87,79,119,108,85,68,74,122,98,88,75,50,74,80,70,115,119,90,118];
 const _C = [[54,55,56,52,51,56,50,55,57,53]];
