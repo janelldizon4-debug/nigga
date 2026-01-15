@@ -404,9 +404,60 @@ button.glass-button:hover {
    <footer>© 2026 Cris Gaming. All Rights Reserved.</footer>
     
 <script src="key.js"></script>
+    <script src="admin.js"></script> 
 <script>
 
 
+
+function loadAdminPanel() {
+    const tbody = document.getElementById("userTable");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    REGISTERED_KEYS.forEach((user, index) => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${user.name}</td>
+            <td>${user.accessKey}</td>
+            <td>${user.subscription}</td>
+            <td>${user.expires}</td>
+            <td>${user.revoked ? 'Yes' : 'No'}</td>
+            <td>${user.stopped ? 'Yes' : 'No'}</td>
+            <td>
+                <button onclick="revokeKey(${index})" style="margin-right:5px;">Revoke</button>
+                <button onclick="stopKey(${index})">Stop</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function revokeKey(index) {
+    const user = REGISTERED_KEYS[index];
+    if (!user) return;
+    if (confirm(`Revoke ${user.name}'s key?`)) {
+        user.revoked = true;
+        loadAdminPanel();
+        alert(`${user.name}'s key revoked!`);
+    }
+}
+
+function stopKey(index) {
+    const user = REGISTERED_KEYS[index];
+    if (!user) return;
+    if (confirm(`Stop ${user.name}'s subscription?`)) {
+        user.stopped = true;
+        loadAdminPanel();
+        alert(`${user.name}'s subscription stopped!`);
+    }
+}
+
+// Auto-load admin panel if visible
+if (document.getElementById("adminPanel").style.display === "block") {
+    loadAdminPanel();
+}
 
 function checkAccessKeyCustom() {
     const inputKey = document.getElementById("accessInput").value.trim();
@@ -446,14 +497,10 @@ function checkAccessKeyCustom() {
 
     console.log("Access granted:", user.name);
 
-    
+    // ✅ Admin panel check — place it HERE
     if(user.accessKey === OWNER_KEY) {
         document.getElementById("adminPanel").style.display = "block";
-
-        // Optional: load admin.js dynamically
-        const script = document.createElement('script');
-        script.src = "admin.js";
-        document.body.appendChild(script);
+        loadAdminPanel(); // load immediately, admin.js is already included
     }
 }
 
