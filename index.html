@@ -306,6 +306,29 @@ button.glass-button:hover {
     font-style: italic;
     margin-top: 10px;
     }
+    #toggleAdminBtn {
+    display: none; 
+    }
+    #adminPanel {
+    display: none;
+    margin-top: 10px;
+    max-height: 300px; 
+    overflow-y: auto;
+    border: 2px solid #ff0000;
+    border-radius: 8px;
+}
+
+#adminPanel table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px; 
+}
+
+#adminPanel th, #adminPanel td {
+    padding: 4px 6px;
+    text-align: center;
+    border: 1px solid #fff;
+}
 </style>
 </head>
 <body>
@@ -378,8 +401,9 @@ button.glass-button:hover {
           <div id="serviceStatus" class="status"></div>
       </div>
 
-          <!-- Admin Panel  -->
-<div id="adminPanel" style="display:none; margin-top:20px;">
+          <button id="toggleAdminBtn" class="glass-button">Show Admin Panel</button>
+
+<div id="adminPanel" style="display:none; margin-top:10px; max-height:300px; overflow:auto;">
   <h3 style="color:white;">Admin Panel</h3>
   <table border="1" width="100%" style="color:white;">
     <thead>
@@ -406,7 +430,19 @@ button.glass-button:hover {
 <script src="key.js"></script>
     <script src="admin.js"></script> 
 <script>
+const toggleBtn = document.getElementById("toggleAdminBtn");
+const adminPanel = document.getElementById("adminPanel");
 
+toggleBtn.addEventListener("click", () => {
+    if (adminPanel.style.display === "none") {
+        adminPanel.style.display = "block";
+        toggleBtn.textContent = "Hide Admin Panel";
+        loadAdminPanel(); // populate table
+    } else {
+        adminPanel.style.display = "none";
+        toggleBtn.textContent = "Show Admin Panel";
+    }
+});
 
 
 function loadAdminPanel() {
@@ -497,6 +533,14 @@ function checkAccessKeyCustom() {
 
     console.log("Access granted:", user.name);
 
+    const toggleBtn = document.getElementById("toggleAdminBtn");
+
+if(user.accessKey === OWNER_KEY){
+    toggleBtn.style.display = "block"; 
+} else {
+    toggleBtn.style.display = "none"; 
+}
+    
     // ✅ Admin panel check — place it HERE
     if(user.accessKey === OWNER_KEY) {
         document.getElementById("adminPanel").style.display = "block";
